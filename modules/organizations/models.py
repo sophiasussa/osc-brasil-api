@@ -64,7 +64,8 @@ class Organization(Base):
     legal_name: Mapped[str | None] = mapped_column(String, nullable=True)
     trade_name: Mapped[str | None] = mapped_column(String, nullable=True)
     legal_nature_code: Mapped[int | None] = mapped_column(
-        Integer, nullable=True
+        ForeignKey("legal_natures.code"),
+        nullable=True,
     )
     matrix_or_branch: Mapped[str | None] = mapped_column(
         String, nullable=True
@@ -111,6 +112,8 @@ class Organization(Base):
         back_populates="organizations",
         order_by="ActivitySubarea.name",
     )
+
+    legal_nature: Mapped["LegalNature | None"] = relationship()
 
 
 class ActivityArea(Base):
@@ -179,4 +182,18 @@ class Municipality(Base):
 
     organizations: Mapped[list["Organization"]] = relationship(
         back_populates="municipality",
+    )
+
+
+class LegalNature(Base):
+    __tablename__ = "legal_natures"
+
+    code: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+    )
+
+    name: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
     )
