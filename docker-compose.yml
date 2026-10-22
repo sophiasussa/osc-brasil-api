@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    container_name: osc-brasil-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      DB_URL: postgresql+psycopg://postgres:postgres@host.docker.internal:5433/osc_brasil
+    restart: unless-stopped
