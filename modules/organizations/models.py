@@ -86,7 +86,12 @@ class Organization(Base):
     )
     address: Mapped[str | None] = mapped_column(Text, nullable=True)
     municipality_code: Mapped[int | None] = mapped_column(
-        Integer, nullable=True
+        ForeignKey("municipalities.code"),
+        nullable=True,
+    )
+
+    municipality: Mapped["Municipality | None"] = relationship(
+        back_populates="organizations",
     )
     latitude: Mapped[float | None] = mapped_column(
         Float, nullable=True
@@ -151,4 +156,27 @@ class ActivitySubarea(Base):
     organizations: Mapped[list["Organization"]] = relationship(
         secondary=organization_subareas,
         back_populates="subareas",
+    )
+
+
+class Municipality(Base):
+    __tablename__ = "municipalities"
+
+    code: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+    )
+
+    name: Mapped[str | None] = mapped_column(
+        String(150),
+        nullable=True,
+    )
+
+    uf: Mapped[str | None] = mapped_column(
+        String(2),
+        nullable=True,
+    )
+
+    organizations: Mapped[list["Organization"]] = relationship(
+        back_populates="municipality",
     )
