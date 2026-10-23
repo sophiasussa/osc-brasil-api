@@ -10,9 +10,9 @@ app = FastAPI(
     version="0.1.0",
 )
 
-app.include_router(organizations_router)
 app.include_router(summary_router)
 app.include_router(filters_router)
+app.include_router(organizations_router)
 
 @app.get("/health", tags=["Health"])
 def health_check() -> dict[str, str]:
