@@ -5,7 +5,10 @@ from sqlalchemy.orm import Session
 
 from core.dependencies import get_db
 from modules.organizations.repository import OrganizationRepository
-from modules.organizations.schemas import OrganizationResponse
+from modules.organizations.schemas import (
+    OrganizationListResponse,
+    OrganizationResponse,
+)
 from modules.organizations.service import OrganizationService
 
 
@@ -24,14 +27,51 @@ def get_organization_service(
 
 @router.get(
     "",
-    response_model=list[OrganizationResponse],
+    response_model=OrganizationListResponse,
 )
 def list_organizations(
-    service: Annotated[OrganizationService, Depends(get_organization_service)],
-    offset: Annotated[int, Query(ge=0)] = 0,
-    limit: Annotated[int, Query(ge=1, le=100)] = 20,
-) -> list[OrganizationResponse]:
-    return service.list_organizations(offset=offset, limit=limit)
+    service: Annotated[
+        OrganizationService,
+        Depends(get_organization_service),
+    ],
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100, alias="pageSize")] = 20,
+    search: Annotated[str | None, Query()] = None,
+    state: Annotated[str | None, Query()] = None,
+    city: Annotated[str | None, Query()] = None,
+    status_filter: Annotated[
+        str | None,
+        Query(alias="status"),
+    ] = None,
+    legal_nature: Annotated[
+        str | None,
+        Query(alias="legalNature"),
+    ] = None,
+    founded_from: Annotated[
+        int | None,
+        Query(ge=1, le=9999, alias="foundedFrom"),
+    ] = None,
+    founded_to: Annotated[
+        int | None,
+        Query(ge=1, le=9999, alias="foundedTo"),
+    ] = None,
+    activity_area: Annotated[
+        str | None,
+        Query(alias="activityArea"),
+    ] = None,
+) -> OrganizationListResponse:
+    return service.list_organizations(
+        page=page,
+        page_size=page_size,
+        search=search,
+        state=state,
+        city=city,
+        status=status_filter,
+        legal_nature=legal_nature,
+        founded_from=founded_from,
+        founded_to=founded_to,
+        activity_area=activity_area,
+    )
 
 
 @router.get(
@@ -40,7 +80,10 @@ def list_organizations(
 )
 def get_organization(
     organization_id: int,
-    service: Annotated[OrganizationService, Depends(get_organization_service)],
+    service: Annotated[
+        OrganizationService,
+        Depends(get_organization_service),
+    ],
 ) -> OrganizationResponse:
     organization = service.get_organization(organization_id)
 
