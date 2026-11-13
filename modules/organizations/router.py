@@ -43,10 +43,7 @@ def list_organizations(
         str | None,
         Query(alias="status"),
     ] = None,
-    legal_nature: Annotated[
-        str | None,
-        Query(alias="legalNature"),
-    ] = None,
+    legal_nature: Annotated[int | None, Query(alias="legalNature")] = None,
     founded_from: Annotated[
         int | None,
         Query(ge=1, le=9999, alias="foundedFrom"),

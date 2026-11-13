@@ -4,6 +4,17 @@ from datetime import date
 from pydantic import BaseModel, ConfigDict
 
 
+class CompletenessCategoryResponse(BaseModel):
+    key: str
+    label: str
+    percentage: float | None
+
+
+class CompletenessResponse(BaseModel):
+    average: float | None
+    categories: list[CompletenessCategoryResponse]
+
+
 class ActivityAreaResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -55,6 +66,7 @@ class OrganizationResponse(BaseModel):
     areas: list[ActivityAreaResponse]
     subareas: list[ActivitySubareaResponse]
     cnaes: list[OrganizationCnaeResponse]
+    completeness: CompletenessResponse
 
 
 class OrganizationListItemResponse(BaseModel):

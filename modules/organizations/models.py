@@ -85,8 +85,8 @@ class Organization(Base):
 
     address: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
-    municipality_code: Mapped[str | None] = mapped_column(
-        String(10),
+    municipality_code: Mapped[int | None] = mapped_column(
+        Integer,
         ForeignKey("municipalities.code"),
         nullable=True,
     )
@@ -159,7 +159,7 @@ class ActivitySubarea(Base):
 class Municipality(Base):
     __tablename__ = "municipalities"
 
-    code: Mapped[str] = mapped_column(Integer, primary_key=True)
+    code: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     state_code: Mapped[str | None] = mapped_column(
         "uf",

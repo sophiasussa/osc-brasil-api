@@ -1,7 +1,10 @@
 from math import ceil
 
-from modules.organizations.models import Organization
+from modules.organizations.completeness import (
+    calculate_organization_completeness,
+)
 from modules.organizations.repository import OrganizationRepository
+from modules.organizations.schemas import OrganizationResponse
 
 
 class OrganizationService:
@@ -17,7 +20,7 @@ class OrganizationService:
         state: str | None = None,
         city: str | None = None,
         status: str | None = None,
-        legal_nature: str | None = None,
+        legal_nature: int | None = None,
         founded_from: int | None = None,
         founded_to: int | None = None,
         activity_area: str | None = None,
@@ -87,5 +90,17 @@ class OrganizationService:
     def get_organization(
         self,
         organization_id: int,
-    ) -> Organization | None:
-        return self.repository.get_by_id(organization_id)
+    ) -> OrganizationResponse | None:
+        organization = self.repository.get_by_id(organization_id)
+        if organization is None:
+            return None
+
+        response_data = {
+            field_name: getattr(organization, field_name)
+            for field_name in OrganizationResponse.model_fields
+            if field_name != "completeness"
+        }
+        response_data["completeness"] = calculate_organization_completeness(
+            organization
+        )
+        return OrganizationResponse.model_validate(response_data)
