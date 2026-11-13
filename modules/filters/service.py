@@ -6,6 +6,7 @@ from modules.filters.schemas import (
     CityOption,
     FiltersResponse,
     FoundationYearRange,
+    LegalNatureOption,
     StateOption,
 )
 
@@ -22,7 +23,10 @@ def get_filters(db: Session) -> FiltersResponse:
             for code, name in states
         ],
         statuses=repository.get_statuses(db),
-        legal_natures=repository.get_legal_natures(db),
+        legal_natures=[
+            LegalNatureOption(code=code, name=name)
+            for code, name in repository.get_legal_natures(db)
+        ],
         activity_areas=repository.get_activity_areas(db),
         foundation_year=FoundationYearRange(
             min=min_year,

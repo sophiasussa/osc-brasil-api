@@ -13,6 +13,11 @@ class FoundationYearRange(BaseModel):
     max: int | None
 
 
+class LegalNatureOption(BaseModel):
+    code: int
+    name: str
+
+
 class FiltersResponse(BaseModel):
     model_config = ConfigDict(
         alias_generator=to_camel,
@@ -21,7 +26,7 @@ class FiltersResponse(BaseModel):
 
     states: list[StateOption]
     statuses: list[str]
-    legal_natures: list[str]
+    legal_natures: list[LegalNatureOption]
     activity_areas: list[str]
     foundation_year: FoundationYearRange
 

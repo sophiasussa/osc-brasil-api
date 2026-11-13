@@ -70,15 +70,18 @@ def get_statuses(db: Session) -> list[str]:
     return list(db.scalars(statement).all())
 
 
-def get_legal_natures(db: Session) -> list[str]:
-    """Returns legal nature names available in the database."""
+def get_legal_natures(db: Session) -> list[tuple[int, str]]:
+    """Returns legal nature codes and names available in the database."""
     statement = (
-        select(distinct(LegalNature.description))
+        select(LegalNature.code, LegalNature.description)
         .where(LegalNature.description.is_not(None))
-        .order_by(LegalNature.description)
+        .order_by(LegalNature.description, LegalNature.code)
     )
 
-    return list(db.scalars(statement).all())
+    return [
+        (code, name)
+        for code, name in db.execute(statement).all()
+    ]
 
 
 def get_activity_areas(db: Session) -> list[str]:
