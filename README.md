@@ -49,3 +49,42 @@ GET /organizations/123
 Each response contains `completeness.average` and a list of category objects
 with `key`, `label`, and nullable `percentage`. Analytics also returns
 `summary`, `byState`, `byActivityArea`, `byFoundationYear`, and `byLegalNature`.
+
+## Rate limiting
+
+The API uses a process-local sliding-window rate limiter to reduce excessive
+requests. By default, each client IP may make 100 requests per 60 seconds.
+Each accepted request is timestamped; only timestamps inside the rolling
+window count, and the oldest active request determines when capacity returns.
+Configure it through the environment:
+
+```env
+RATE_LIMIT_MAX_REQUESTS=100
+RATE_LIMIT_WINDOW_SECONDS=60
+RATE_LIMIT_ENABLED=true
+```
+
+When the limit is exceeded, the API returns HTTP 429 with
+`{"detail":"Rate limit exceeded. Please try again later."}` and a
+`Retry-After` header containing the number of seconds until the oldest request
+in the active window expires. `/health` is excluded so liveness checks remain
+available during traffic spikes.
+
+The client IP is taken from the ASGI connection (`scope["client"][0]`); the
+middleware does not trust `X-Forwarded-For` or other forwarding headers. When
+the ASGI client address is missing, those requests share an explicit fallback
+bucket and are still rate-limited (so they can affect one another). No
+trusted-proxy configuration is currently present. Behind a reverse proxy, the
+ASGI connection IP may identify the proxy rather than the original client;
+configure trusted proxy handling explicitly before using proxy-provided
+client addresses.
+Set `RATE_LIMIT_ENABLED=false` to disable limiting.
+
+**The rate limiter uses process-local memory. Its counters are not shared
+between application processes, workers, containers, or pods. All counters are
+lost when the application restarts.** This is suitable for the current
+single-instance deployment; multi-instance deployments need shared storage
+such as Redis.
+
+Run the test suite with `pip install -r requirements-dev.txt` followed by
+`pytest`.

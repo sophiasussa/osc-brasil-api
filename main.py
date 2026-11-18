@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 
+from core.config import settings
+from middleware.rate_limit import RateLimitMiddleware
 from modules.analytics.router import router as analytics_router
 from modules.organizations.router import router as organizations_router
 from modules.summary.router import router as summary_router
@@ -9,6 +11,13 @@ app = FastAPI(
     title="OSC Brasil API",
     description="API para consulta e análise de dados das Organizações da Sociedade Civil no Brasil.",
     version="0.1.0",
+)
+
+app.add_middleware(
+    RateLimitMiddleware,
+    max_requests=settings.rate_limit_max_requests,
+    window_seconds=settings.rate_limit_window_seconds,
+    enabled=settings.rate_limit_enabled,
 )
 
 app.include_router(summary_router)
