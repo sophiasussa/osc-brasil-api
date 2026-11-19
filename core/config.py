@@ -4,9 +4,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     db_url: str
-    rate_limit_max_requests: int = Field(default=100, ge=1)
+    redis_url: str = "redis://localhost:6379/0"
+    rate_limit_max_requests: int = Field(default=5, ge=1)
     rate_limit_window_seconds: float = Field(
-        default=60,
+        default=30,
         gt=0,
         allow_inf_nan=False,
     )

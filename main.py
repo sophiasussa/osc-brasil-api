@@ -7,6 +7,10 @@ from modules.organizations.router import router as organizations_router
 from modules.summary.router import router as summary_router
 from modules.filters.router import router as filters_router
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
 app = FastAPI(
     title="OSC Brasil API",
     description="API para consulta e análise de dados das Organizações da Sociedade Civil no Brasil.",
