@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy.orm import Session
 
 from core import cache
@@ -10,12 +12,13 @@ from modules.filters.schemas import (
     LegalNatureOption,
     StateOption,
 )
-import logging
 
 logger = logging.getLogger(__name__)
 
 FILTERS_CACHE_KEY = "osc:filters:v1"
 FILTERS_CACHE_TTL_SECONDS = 86400
+CITIES_CACHE_KEY_PREFIX = "osc:filters:cities:v1"
+CITIES_CACHE_TTL_SECONDS = 86400
 
 
 def get_filters(db: Session) -> FiltersResponse:
@@ -62,11 +65,30 @@ def get_filters(db: Session) -> FiltersResponse:
 def get_cities_by_uf(db: Session, uf: str) -> CitiesResponse:
     """Returns the cities associated with organizations in a state."""
 
+    cache_key = f"{CITIES_CACHE_KEY_PREFIX}:{uf}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        try:
+            response = CitiesResponse.model_validate_json(cached)
+            logger.info("Cities cache HIT")
+            return response
+        except (ValueError, TypeError):
+            logger.warning("Invalid cities cache. Deleting key.")
+            cache.delete(cache_key)
+
+    logger.info("Cities cache MISS")
+
     cities = repository.get_cities_by_uf(db, uf)
 
-    return CitiesResponse(
+    response = CitiesResponse(
         items=[
             CityOption(code=code, name=name)
             for code, name in cities
         ]
     )
+    cache.set(
+        cache_key,
+        response.model_dump_json(),
+        CITIES_CACHE_TTL_SECONDS,
+    )
+    return response
